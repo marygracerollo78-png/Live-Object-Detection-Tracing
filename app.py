@@ -6,37 +6,31 @@ import cv2
 import time
 import os
 
-# 🌸 PAGE CONFIG
 st.set_page_config(
     page_title="Live Object Detection & Tracing",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# 📁 SAVE DIRECTORY
 SAVE_DIR = "frames"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 st.markdown("""
 <style>
 
-/* 🌸 MAIN BACKGROUND */
 .stApp {
     background-color: #f5f0ff;
 }
 
-/* 🌸 SIDEBAR */
 [data-testid="stSidebar"] {
     background-color: #ede4ff;
     border-right: none;
 }
 
-/* 🌸 SIDEBAR TEXT */
 [data-testid="stSidebar"] * {
     color: #4b2e83 !important;
 }
 
-/* 🌸 REMOVE BOX DESIGN */
 .control-box {
     background: transparent;
     border: none;
@@ -45,7 +39,6 @@ st.markdown("""
     box-shadow: none;
 }
 
-/* 🌸 TITLE */
 .main-title {
     text-align: center;
     font-size: 38px;
@@ -54,20 +47,17 @@ st.markdown("""
     margin-bottom: 20px;
 }
 
-/* 🌸 SELECTBOX */
 .stSelectbox > div > div {
     background-color: white !important;
     border: 1px solid #cdb4ff !important;
     border-radius: 8px !important;
 }
 
-/* 🌸 VIDEO */
 video {
     border-radius: 12px !important;
     border: 2px solid #cdb4ff !important;
 }
 
-/* 🌸 REMOVE STATUS BOX DESIGN */
 .status-box {
     background: transparent;
     color: #4b2e83;
@@ -79,7 +69,6 @@ video {
 </style>
 """, unsafe_allow_html=True)
 
-# 🤖 LOAD YOLO MODEL
 @st.cache_resource
 def load_model():
     return YOLO("yolov8n.pt")
@@ -87,17 +76,16 @@ def load_model():
 model = load_model()
 class_names = list(model.names.values())
 
-# 🌸 SIDEBAR
 with st.sidebar:
 
     st.markdown("""
     <h2 style='text-align:center; color:#4b2e83;'>
-        🎯 Settings
+        Settings
     </h2>
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="control-box">', unsafe_allow_html=True)
-    save_frames = st.checkbox("💾 Save Detected Frames", False)
+    save_frames = st.checkbox("💾Save Detected Frames", False)
     st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="control-box">', unsafe_allow_html=True)
@@ -106,26 +94,18 @@ with st.sidebar:
 
     st.markdown('<div class="control-box">', unsafe_allow_html=True)
     target_object = st.selectbox(
-        "🎯 Target Object",
+        " Target Object",
         class_names,
         index=0
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="status-box">
-        ✅ System Active
-    </div>
-    """, unsafe_allow_html=True)
-
-# 🌸 MAIN TITLE
 st.markdown("""
 <div class="main-title">
     Live Object Detection & Tracing
 </div>
 """, unsafe_allow_html=True)
 
-# 🎥 VIDEO PROCESSOR
 class VideoProcessor(VideoProcessorBase):
 
     def __init__(self):
@@ -133,12 +113,10 @@ class VideoProcessor(VideoProcessorBase):
 
     def recv(self, frame):
 
-        # 📷 FRAME
         img = frame.to_ndarray(format="bgr24")
         img = cv2.flip(img, 1)
         img = cv2.resize(img, (640, 480))
 
-        # 🤖 DETECTION
         results = model.track(img, persist=True, verbose=False)
 
         object_counts = {}
@@ -159,13 +137,11 @@ class VideoProcessor(VideoProcessorBase):
 
                     is_target = (label == target_object)
 
-                    # 🔥 RED BOX IF TARGET
                     color = (0, 0, 255) if is_target else (170, 120, 255)
 
                     if is_target:
                         target_detected = True
 
-                    # 📦 BOUNDING BOX
                     cv2.rectangle(
                         img,
                         (x1, y1),
@@ -174,7 +150,6 @@ class VideoProcessor(VideoProcessorBase):
                         3
                     )
 
-                    # 🏷️ LABEL
                     cv2.putText(
                         img,
                         label,
@@ -185,7 +160,6 @@ class VideoProcessor(VideoProcessorBase):
                         2
                     )
 
-        # 🚨 ALERT
         if enable_alert and target_detected:
 
             alert_text = f"🚨 ALERT: {target_object.upper()} DETECTED"
@@ -208,7 +182,6 @@ class VideoProcessor(VideoProcessorBase):
                 3
             )
 
-        # 📊 OBJECT COUNTS
         y = 80
 
         for obj, cnt in object_counts.items():

@@ -6,6 +6,7 @@ import cv2
 import time
 import os
 
+
 st.set_page_config(
     page_title="Live Object Detection & Tracing",
     layout="wide",
@@ -71,7 +72,12 @@ video {
 
 @st.cache_resource
 def load_model():
-    return YOLO("yolov8n.pt")
+    model_path = "yolov8n.pt"
+
+    if not os.path.exists(model_path):
+        YOLO(model_path)  # force fresh download
+
+    return YOLO(model_path, task="detect")
 
 model = load_model()
 class_names = list(model.names.values())
